@@ -93,6 +93,8 @@ String num_molde;
 String cant_moldes;
 String respuesta;
 String idMateriales;
+String datoTeclado;
+int contadorTeclado = 0;
 unsigned long nowtime = 0;
 
 
@@ -431,43 +433,7 @@ void leerTag() {
 
       revisarWiFi();
 
-
-      Serial.print("Reading: ");
-      Serial.println(scale.get_units(), 0);
-      //lcd.clear();
-
-      lcd.setCursor(0, 1);
-      //lcd.print(scale.get_units(), 0);
-      masa = String(scale.get_units(), 0);
-      lcd.print("   " + (String(scale.get_units(), 0)) + " gramos    ");
-      //      Serial.print(" gramos"); //Change this to kg and re-adjust the calibration factor if you follow SI units like a sane person
-      //      Serial.print(" calibration_factor: ");
-      //      Serial.print(calibration_factor);
-      //      Serial.print(" Dato RFID");
-      //      Serial.print(datoTag);
-      //      Serial.print(" Variable masa: ");
-      //      Serial.print(masa);
-      //      Serial.println();
-      if (digitalRead(tareButton) == HIGH) {
-        scale.tare();
-        unsigned long tareTime = millis();
-        while (digitalRead(tareButton) == HIGH) {
-
-          if (millis() - tareTime > 1200) {
-            Serial.println(">>> menú principal !");
-            //ESP.restart();
-            //client.stop();
-            //client.flush();
-            contadorSalida++;
-            salida++;
-            return;
-          }
-        }
-
-        //lcd.clear();
-        //return;
-
-      }
+      leerMasa();
 
     }
   }
@@ -539,7 +505,7 @@ void enviarDatos() {
     num_molde = separar.separa(line, ',', num_respuesta);
     cant_moldes = separar.separa(line, ',', num_respuesta2);
     respuesta = cant_moldes;
-    idMateriales= num_molde;
+    idMateriales = num_molde;
     Serial.println("codigo obtenido");
     Serial.println(num_molde);
     Serial.println("cantidad de moldes a asignar");
@@ -951,7 +917,7 @@ void seleccionInicial() {
 
           lcd.print("RetirarMaterial");
           claseTag = 1;
-          leerTag();
+          leerTeclado();
           if (salida == 1) {
             return;
           }
@@ -963,7 +929,7 @@ void seleccionInicial() {
           temp = -temp;
           num_respuesta = 0; //para obtener ingreso exitoso
           num_respuesta2 = 4;
-          enviarDatos();
+          //enviarDatos();
         }
 
       }
@@ -1311,6 +1277,119 @@ byte escribirRespuestaMasiva() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void leerTeclado() {
+  char tecla ;
+
+  tecla  = teclado.getKey();
+  if (tecla != NO_KEY) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("ID=");
+
+    if (tecla == '*') {
+
+      if (contadorTeclado > 0) {
+
+        contadorTeclado--;
+        int largoString;
+        largoString = idProduccionString.length();
+        idProduccionString.remove(largoString - 1);
+        lcd.setCursor(4, 0);
+        lcd.print(idProduccionString);
+        lcd.setCursor(contadorTeclado + 4 , 0);
+        lcd.print(" ");
+
+      }
+      else {
+
+      }
+    }
+    else if (tecla == '#') {
+      //aquí guardo el string en un rótulo,
+      idMateriales = datoTeclado;
+      cuentaLecturas = 1;
+      contadorTeclado = 0;
+      idProduccionString = "";
+      
+
+
+      lcd.setCursor(4, 0);
+      lcd.print(datoTeclado + "->OK");
+      Serial.print("valor del id después de digitar uno = ");
+      Serial.println(datoTeclado);
+    }
+
+    else {
+      idProduccion[contadorTeclado] = tecla;
+      lcd.setCursor(4, 0);
+      lcd.print(idProduccionString);
+      lcd.setCursor(contadorTeclado + 4 , 0);
+      lcd.print(tecla);
+
+
+      if (contadorTeclado > 6) {
+        idProduccion [contadorTeclado] = '\0';
+      }
+
+      idProduccionString += idProduccion[contadorTeclado];
+      Serial.print ("idProduccionString");
+      Serial.print(" = ");
+      Serial.println (idProduccionString);
+      contadorTeclado++;
+
+    }
+
+  }
+  //datoTag =idProduccionString;
+  datoTeclado = idProduccionString;
+
+  leerMasa();
+
+}
+
+//*************************************************************
+void leerMasa() {
+
+  //lo siguiente se encuentra en la función de leer tag, se podría crear una función para esto
+
+  Serial.print("Reading: ");
+  Serial.println(scale.get_units(), 0);
+  //lcd.clear();
+
+  lcd.setCursor(0, 1);
+  //lcd.print(scale.get_units(), 0);
+  masa = String(scale.get_units(), 0);
+  lcd.print("   " + (String(scale.get_units(), 0)) + " gramos    ");
+  //      Serial.print(" gramos"); //Change this to kg and re-adjust the calibration factor if you follow SI units like a sane person
+  //      Serial.print(" calibration_factor: ");
+  //      Serial.print(calibration_factor);
+  //      Serial.print(" Dato RFID");
+  //      Serial.print(datoTag);
+  //      Serial.print(" Variable masa: ");
+  //      Serial.print(masa);
+  //      Serial.println();
+  if (digitalRead(tareButton) == HIGH) {
+    scale.tare();
+    unsigned long tareTime = millis();
+    while (digitalRead(tareButton) == HIGH) {
+
+      if (millis() - tareTime > 1200) {
+        Serial.println(">>> menú principal !");
+        //ESP.restart();
+        //client.stop();
+        //client.flush();
+        contadorSalida++;
+        salida++;
+        return;
+      }
+    }
+
+    //lcd.clear();
+    //return;
+
+  }
+}
 
 //******************************************************************
