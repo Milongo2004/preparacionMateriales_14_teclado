@@ -4,9 +4,9 @@
 
   El presente programa está basado en la fusión simpleReading de preparacionMateriales_13
   la diferencia radica en el uso del teclado matricial para seleccionar las opciones
-  y digitar un código en el momento de la salida o devolución del material y en la presentación del id del lote 
+  y digitar un código en el momento de la salida o devolución del material y en la presentación del id del lote
   de material preparado para la escritura física en las bolsas.
-  
+
 
 */
 
@@ -21,15 +21,17 @@ HX711 scale;
 
 float calibration_factor = -288; //-7050 worked for my 440lb max scale setup
 
-#define tareButton 35
+#define tareButton 39
 String masa;
+
+#define WIFI_PIN 35
 
 //en vez de botones defino la selección de opciones con el teclado
 
 /*
-#define entraButton 34
-#define saleButton 39
-#define desperdicioButton 36
+  #define entraButton 34
+  #define saleButton 39
+  #define desperdicioButton 36
 */
 
 ////incluyo librerías Y defino variables para el control del teclado
@@ -90,6 +92,7 @@ uint8_t pageAddr = 0x06;  //In this example we will write/read 16 bytes (page 6,
 String num_molde;
 String cant_moldes;
 String respuesta;
+String idMateriales;
 unsigned long nowtime = 0;
 
 
@@ -231,9 +234,9 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   pinMode(ledWiFi, OUTPUT);
   pinMode(tareButton, INPUT);
-//  pinMode(entraButton, INPUT);
-//  pinMode(saleButton, INPUT);
-//  pinMode(desperdicioButton, INPUT);
+  //  pinMode(entraButton, INPUT);
+  //  pinMode(saleButton, INPUT);
+  //  pinMode(desperdicioButton, INPUT);
   Serial.begin (115200);
   Wire.begin(I2C_SDA, I2C_SCL);
   SPI.begin(); // inicio SPI bus
@@ -536,6 +539,7 @@ void enviarDatos() {
     num_molde = separar.separa(line, ',', num_respuesta);
     cant_moldes = separar.separa(line, ',', num_respuesta2);
     respuesta = cant_moldes;
+    idMateriales= num_molde;
     Serial.println("codigo obtenido");
     Serial.println(num_molde);
     Serial.println("cantidad de moldes a asignar");
@@ -546,7 +550,9 @@ void enviarDatos() {
 
       lcd.clear();
       lcd.setCursor(0, 0);
-      lcd.print("Respuesta=");
+      lcd.print("ID = ");
+      lcd.setCursor(5, 0);
+      lcd.print(idMateriales);
       lcd.setCursor(0, 1);
       lcd.print("Ingreso Exitoso!");
       //      lcd.setCursor(0, 1);
@@ -568,11 +574,11 @@ void enviarDatos() {
 
     }
     else {
-//      lcd.clear();
-//      lcd.setCursor(0, 0);
-//      lcd.print("Respuesta=");
-//      lcd.setCursor(0, 1);
-//      lcd.print("------->      ");
+      //      lcd.clear();
+      //      lcd.setCursor(0, 0);
+      //      lcd.print("Respuesta=");
+      //      lcd.setCursor(0, 1);
+      //      lcd.print("------->      ");
     }
 
     //}
@@ -600,7 +606,7 @@ void enviarDatos() {
   }
   //memcpy(buffer, dataChar, 16); //guarda en el buffer el dato en arreglo. hacer esto cuando le presiono la b.
   Serial.println("wait 5 sec...");
-  delay(500);//remplazar por el if de arriba.
+  delay(2000);//remplazar por el if de arriba.
   //distancia = "";
   //rotulo="";
   nowtime = timecontrol;
@@ -625,7 +631,7 @@ void menuInicio () {
 }
 //***********************************************************************
 /*
-void seleccionInicial() {
+  void seleccionInicial() {
 
   //TAREA: Modificar a lectura de teclado en vez de botones.
 
@@ -893,7 +899,7 @@ void seleccionInicial() {
 
 
   }
-}
+  }
 */
 //**********************************************************************
 void seleccionInicial() {
@@ -904,51 +910,53 @@ void seleccionInicial() {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Ha seleccionado:");
-   
+    delay(1000);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+
 
     if (teclaOprimida == 'A') {
       Serial.println(" ingresar bolsas de material preparado a las neveras ");
-      lcd.setCursor(0, 1);
+
       lcd.print("ingresarMaterial");
       Serial.println("ponga el material en la báscula y luego pase un imán con Tag por el lector");
-          claseTag = 1;//por tratarse de un molde
-          leerTag();
-          if (salida == 1) {
-            return;
-          }
+      claseTag = 1;
+      leerTag();
+      if (salida == 1) {
+        return;
+      }
 
-          delay(500);
+      delay(500);
 
-          temp = String(masa).toInt();
-          proceso = 11;
-          hum = 8;
-          num_respuesta = 0; //para obtener ingreso exitoso
-          num_respuesta2 = 4;
-          enviarDatos();
+      temp = String(masa).toInt();
+      proceso = 11;
+      hum = 8;
+      num_respuesta = 1; //para obtener id del material preparado
+      num_respuesta2 = 4;
+      enviarDatos();
     }
-  
+
 
     else if (teclaOprimida == 'B') {
-      char tecla ;
+
 
 
       int contador = 0;
       while (contador <= 1 ) {
-        tecla  = teclado.getKey();//ANTERIORMENTE ESTABA completo con definición y asignación ABAJO DEL WHILE contador sizeof
+
 
         if (contador == 0) {
 
           Serial.println(" Retirar material de la nevera ");
-          lcd.clear();
-          lcd.setCursor(0, 1);
+
           lcd.print("RetirarMaterial");
-          claseTag = 1;//por tratarse de un molde
+          claseTag = 1;
           leerTag();
           if (salida == 1) {
             return;
           }
 
-          
+
           temp = String(masa).toInt();
           proceso = 11;
           hum = 1;
@@ -957,102 +965,100 @@ void seleccionInicial() {
           num_respuesta2 = 4;
           enviarDatos();
         }
-        
+
       }
     }
 
     else if (teclaOprimida == 'C') {
       Serial.println(" Lectura ");
 
-     
 
-          lcd.setCursor(0, 1);
-          lcd.print("Grab Id Color");
-          delay(500);
+
+
+      lcd.print("RetornarMaterial");
+
+
+
+      //igualo el id menor al dato obtenido con el teclado
+
+      idProduccionMenor = 1;
+
+      rotulo = 1;
+
+      Serial.println(rotulo);
+      Serial.println(" cargar conjunto de colores, desde la base de datos, para grabarlas una por una en Tag  ");
+
+
+
+      num_respuesta = 1; //igualo num_respuesta a 1 para obtener ultimo dato de la tabla_produc
+      proceso = 10;
+      enviarDatos();
+      Serial.print("respuesta9 = ");
+      Serial.println(respuesta9);
+
+      //descompongo la respuesta 10 y la voy presentando en el display y grabandola en el tag
+      //descomponerRespuestaMasiva();
+      int k = 0;
+      while (k < 1000) {
+        byte returnTecla = 0;
+        //separo el dato de id como par y el de referencia como impar
+        respId = separar.separa(respuesta9, '*', k);
+        Serial.print("id= ");
+        Serial.println(respId);
+        if (respId == "") {
+          k = 1000;
           lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("¡Grabado");
+          lcd.setCursor(4, 1);
+          lcd.print("Finalizado!");
+          delay(900);
+        }
+        else {
+          respRef = separar.separa(respuesta9, '*', k + 1);
+          Serial.print("color= ");
+          Serial.println(respRef);
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Id: ");
+          lcd.setCursor(0, 1);
+          lcd.print("Color: ");
+          lcd.setCursor(4, 0);
+          lcd.print(respId);
+          lcd.setCursor(7, 1);
+          lcd.print(respRef);
+          //guardo el id en el dataChar para guardarlo en el tag.
+          respRef.toCharArray(dataChar, 18);
+          returnTecla = escribirRespuestaMasiva();
+          delay(500);
 
+          if (returnTecla == 2) {
+            //miro si el valor mostrado de la lista es el primero, en tal caso no desciende más
+            if (k == 0) {
 
-
-          //igualo el id menor al dato obtenido con el teclado
-
-          idProduccionMenor = 1;
-
-          rotulo = 1;
-
-          Serial.println(rotulo);
-          Serial.println(" cargar conjunto de referencias de rótulo, desde la base de datos, para grabarlas una por una en Tag  ");
-
-
-
-          num_respuesta = 1; //igualo num_respuesta a 1 para obtener ultimo dato de la tabla_produc
-          proceso = 10;
-          enviarDatos();
-          Serial.print("respuesta9 = ");
-          Serial.println(respuesta9);
-
-          //descompongo la respuesta 10 y la voy presentando en el display y grabandola en el tag
-          //descomponerRespuestaMasiva();
-          int k = 0;
-          while (k < 1000) {
-            byte returnTecla = 0;
-            //separo el dato de id como par y el de referencia como impar
-            respId = separar.separa(respuesta9, '*', k);
-            Serial.print("id= ");
-            Serial.println(respId);
-            if (respId == "") {
-              k = 1000;
-              lcd.clear();
-              lcd.setCursor(0, 0);
-              lcd.print("¡Grabado");
-              lcd.setCursor(4, 1);
-              lcd.print("Finalizado!");
-              delay(900);
             }
             else {
-              respRef = separar.separa(respuesta9, '*', k + 1);
-              Serial.print("color= ");
-              Serial.println(respRef);
-              lcd.clear();
-              lcd.setCursor(0, 0);
-              lcd.print("Id: ");
-              lcd.setCursor(0, 1);
-              lcd.print("Color: ");
-              lcd.setCursor(4, 0);
-              lcd.print(respId);
-              lcd.setCursor(7, 1);
-              lcd.print(respRef);
-              //guardo el id en el dataChar para guardarlo en el tag.
-              respRef.toCharArray(dataChar, 18);
-              returnTecla = escribirRespuestaMasiva();
-              delay(500);
-
-              if (returnTecla == 2) {
-                //miro si el valor mostrado de la lista es el primero, en tal caso no desciende más
-                if (k == 0) {
-
-                }
-                else {
-                  k -= 2;
-                }
-              }
-              else if (returnTecla == 3) {
-                k = 1000;
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("X---->Salir");
-                delay(500);
-              }
-              else {
-                k += 2;
-              }
+              k -= 2;
             }
           }
-          return;
-          if (salida == 1) {
-            return;
+          else if (returnTecla == 3) {
+            k = 1000;
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("X---->Salir");
+            delay(500);
           }
-        
-      
+          else {
+            k += 2;
+          }
+        }
+      }
+      return;
+      if (salida == 1) {
+        return;
+      }
+
+
 
 
 
@@ -1102,7 +1108,7 @@ void seleccionInicial() {
       }
     }
 
-  
+
     else {
       Serial.println("incorrecta");
       lcd.setCursor(5, 1);
@@ -1112,7 +1118,7 @@ void seleccionInicial() {
 
     }
   }
-  }
+}
 
 
 
@@ -1164,7 +1170,7 @@ void revisarWiFi() {
 
 byte escribirRespuestaMasiva() {
 
-  /*
+
 
   // declaro la variable a retornar
   byte navegaRef = 0;
@@ -1173,18 +1179,23 @@ byte escribirRespuestaMasiva() {
   memcpy(buffer, dataChar, 16); //guarda en el buffer el dato en arreglo.
 
 
+
+
   //agrego variable de escritura para mantener el estado de alerta mientras no haya tarjeta
-  //char tecla;
+
   int escritura = 0;
+
 
   //agrego mensaje para pasar tarjeta despues de recibir el dato en el terminal
 
   while (escritura == 0) {
     size = sizeof(buffer);
 
+    char tecla;
 
-    if (digitalRead(entraButton) == HIGH || digitalRead(saleButton) == HIGH || digitalRead(desperdicioButton) == HIGH) {
-      if (digitalRead(entraButton) == HIGH && digitalRead(saleButton) == LOW && digitalRead(desperdicioButton) == LOW) {
+    tecla  = teclado.getKey();
+    if (tecla != NO_KEY) {
+      if (tecla == '#') {
         for (byte i = 0; i < 16; i++) {
           buffer[i] = '\0';
           dataChar[i] = '\0';
@@ -1192,7 +1203,7 @@ byte escribirRespuestaMasiva() {
         navegaRef = 1; //valor de 1 para subir en la lista de referencias
         return navegaRef;
       }
-      else if (digitalRead(entraButton) == LOW && digitalRead(saleButton) == HIGH && digitalRead(desperdicioButton) == LOW) {
+      else if (tecla == '*') {
 
         for (byte i = 0; i < 16; i++) {
           buffer[i] = '\0';
@@ -1201,7 +1212,7 @@ byte escribirRespuestaMasiva() {
         navegaRef = 2; //valor de 2 para bajar en la lista de referencias
         return navegaRef;
       }
-      else if (digitalRead(entraButton) == LOW && digitalRead(saleButton) == LOW && digitalRead(desperdicioButton) == HIGH) {
+      else if (tecla == '0') {
         for (byte i = 0; i < 16; i++) {
           buffer[i] = '\0';
           dataChar[i] = '\0';
@@ -1295,7 +1306,7 @@ byte escribirRespuestaMasiva() {
   }
   // enviarDatos();
   //return datoTag;
-  */
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
