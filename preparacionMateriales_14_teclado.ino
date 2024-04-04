@@ -236,6 +236,7 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   pinMode(ledWiFi, OUTPUT);
   pinMode(tareButton, INPUT);
+  pinMode(WIFI_PIN, INPUT);
   //  pinMode(entraButton, INPUT);
   //  pinMode(saleButton, INPUT);
   //  pinMode(desperdicioButton, INPUT);
@@ -590,283 +591,14 @@ void enviarDatos() {
 //***************************************************************
 //*******************************************************************+
 void menuInicio () {
+  salida = 0;
+  contadorSalida = 0;
   lcd.setCursor(0, 0);
   lcd.print("A.Ingres B.Retir");
   lcd.setCursor(0, 1);
   lcd.print("   C.Desperd");
 }
-//***********************************************************************
-/*
-  void seleccionInicial() {
 
-  //TAREA: Modificar a lectura de teclado en vez de botones.
-
-  contadorSalida = 0;
-  if (digitalRead(entraButton) == HIGH || digitalRead(saleButton) == HIGH || digitalRead(desperdicioButton) == HIGH) {
-    Serial.println("Ha seleccionado :  "  );
-
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Ha seleccionado:");
-
-    Serial.print(" = ");
-
-
-
-    if (digitalRead(entraButton) == HIGH && digitalRead(saleButton) == LOW && digitalRead(desperdicioButton) == LOW) {
-
-
-
-
-      while (contadorSalida == 0 ) {
-
-        if (contadorSalida == 0) {
-
-          Serial.println(" ingresar bolsas de material preparado a las neveras ");
-          //          lcd.clear();
-          //          lcd.setCursor(0, 0);
-          //          lcd.print("ingresarMaterial");
-          //          delay(400);
-          //          lcd.clear();
-          //          lcd.setCursor(0, 1);
-          //          lcd.print("Peso= ");
-          //          lcd.setCursor(0, 1);
-          //          lcd.print("       Col= ");
-          lcd.setCursor(0, 0);
-          lcd.print("ingresarMaterial");
-          Serial.println("ponga el material en la báscula y luego pase un imán con Tag por el lector");
-          claseTag = 1;//por tratarse de un molde
-          leerTag();
-          if (salida == 1) {
-            return;
-          }
-
-          delay(500);
-
-          temp = String(masa).toInt();
-          proceso = 11;
-          hum = 8;
-          num_respuesta = 0; //para obtener ingreso exitoso
-          num_respuesta2 = 4;
-          enviarDatos();
-        }
-        //        if (digitalRead(tareButton) == HIGH)  {
-        //
-        //          contadorSalida++;
-        //
-        //
-        //        }
-      }
-    }
-
-
-    else if (digitalRead(entraButton) == LOW && digitalRead(saleButton) == HIGH && digitalRead(desperdicioButton) == LOW) {
-
-
-
-
-      while (contadorSalida == 0 ) {
-
-        if (contadorSalida == 0) {
-
-          Serial.println(" retirar bolsas de material preparado a las neveras ");
-          //          lcd.clear();
-          //          lcd.setCursor(0, 0);
-          //          lcd.print("RetirarMaterial");
-          //          delay(500);
-          //          lcd.clear();
-          //          lcd.setCursor(0, 1);
-          //          lcd.print("Peso= ");
-          //          lcd.setCursor(1, 1);
-          //          lcd.print("Color= ");
-          lcd.setCursor(0, 0);
-          lcd.print("RetirarMaterial");
-          claseTag = 1;//por tratarse de un molde
-          leerTag();
-          if (salida == 1) {
-            return;
-          }
-
-          //          delay(500);
-          //          lcd.clear();
-          //          lcd.setCursor(0, 0);
-          //          lcd.print("Digite # de");
-          //          lcd.setCursor(0, 1);
-          //          lcd.print("BolsasRetiradas:");
-          //          delay(500);
-          //          //descontar();
-          temp = String(masa).toInt();
-          proceso = 11;
-          hum = 1;
-          temp = -temp;
-          num_respuesta = 0; //para obtener ingreso exitoso
-          num_respuesta2 = 4;
-          enviarDatos();
-        }
-        //        if (digitalRead(tareButton) == HIGH) {
-        //
-        //          contadorSalidaSalida++;
-        //
-        //
-        //        }
-      }
-    }
-    else if (digitalRead(entraButton) == LOW && digitalRead(saleButton) == LOW && digitalRead(desperdicioButton) == HIGH) {
-
-      unsigned long despButtonTime = millis();
-      while (digitalRead(desperdicioButton) == HIGH) {
-
-        if (millis() - despButtonTime > 3000) {
-
-          Serial.println(" grabar los nombres de los colores en los tags ");
-          lcd.setCursor(4, 1);
-          lcd.print("id Color");
-          delay(500);
-          lcd.clear();
-
-          lcd.setCursor(0, 1);
-          lcd.print("DesdeBaseDatos");
-          delay(700);
-          lcd.clear();
-
-
-
-          //igualo el id menor al dato obtenido con el teclado
-
-          idProduccionMenor = 1;
-
-          rotulo = 1;
-
-          Serial.println(rotulo);
-          Serial.println(" cargar conjunto de referencias de rótulo, desde la base de datos, para grabarlas una por una en Tag  ");
-
-
-
-          num_respuesta = 1; //igualo num_respuesta a 1 para obtener ultimo dato de la tabla_produc
-          proceso = 10;
-          enviarDatos();
-          Serial.print("respuesta9 = ");
-          Serial.println(respuesta9);
-
-          //descompongo la respuesta 10 y la voy presentando en el display y grabandola en el tag
-          //descomponerRespuestaMasiva();
-          int k = 0;
-          while (k < 1000) {
-            byte returnTecla = 0;
-            //separo el dato de id como par y el de referencia como impar
-            respId = separar.separa(respuesta9, '*', k);
-            Serial.print("id= ");
-            Serial.println(respId);
-            if (respId == "") {
-              k = 1000;
-              lcd.clear();
-              lcd.setCursor(0, 0);
-              lcd.print("¡Grabado");
-              lcd.setCursor(4, 1);
-              lcd.print("Finalizado!");
-              delay(900);
-            }
-            else {
-              respRef = separar.separa(respuesta9, '*', k + 1);
-              Serial.print("color= ");
-              Serial.println(respRef);
-              lcd.clear();
-              lcd.setCursor(0, 0);
-              lcd.print("Id: ");
-              lcd.setCursor(0, 1);
-              lcd.print("Color: ");
-              lcd.setCursor(4, 0);
-              lcd.print(respId);
-              lcd.setCursor(7, 1);
-              lcd.print(respRef);
-              //guardo el id en el dataChar para guardarlo en el tag.
-              respRef.toCharArray(dataChar, 18);
-              returnTecla = escribirRespuestaMasiva();
-              delay(500);
-
-              if (returnTecla == 2) {
-                //miro si el valor mostrado de la lista es el primero, en tal caso no desciende más
-                if (k == 0) {
-
-                }
-                else {
-                  k -= 2;
-                }
-              }
-              else if (returnTecla == 3) {
-                k = 1000;
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("X---->Salir");
-                delay(500);
-              }
-              else {
-                k += 2;
-              }
-            }
-          }
-          return;
-          if (salida == 1) {
-            return;
-          }
-        }
-      }
-
-
-
-      while (contadorSalida == 0 ) {
-
-        if (contadorSalida == 0) {
-
-          Serial.println(" Descartar material endurecido");
-          //          lcd.clear();
-          //          lcd.setCursor(0, 0);
-          //          lcd.print("BotarMaterial");
-          //          delay(400);
-          //          lcd.clear();
-          //          lcd.setCursor(0, 1);
-          //          lcd.print("Peso= ");
-          //          lcd.setCursor(1, 1);
-          //          lcd.print("Color= ");
-          lcd.setCursor(0, 0);
-          lcd.print("EliminarMaterial");
-          claseTag = 1;//por tratarse de un molde
-          leerTag();
-          if (salida == 1) {
-            return;
-          }
-
-          //          delay(500);
-          //          lcd.clear();
-          //          lcd.setCursor(0, 0);
-          //          lcd.print("Digite # de");
-          //          lcd.setCursor(0, 1);
-          //          lcd.print("BolsasIngresadas:");
-          //          delay(500);
-          //          //descontar();
-          temp = String(masa).toInt();
-          proceso = 11;
-          hum = 9;
-          num_respuesta = 0; //para obtener ingreso exitoso
-          num_respuesta2 = 4;
-          enviarDatos();
-        }
-        //        if (digitalRead(tareButton) == HIGH) {
-        //
-        //          contadorSalida++;
-        //
-        //
-        //        }
-      }
-    }
-
-
-
-
-
-  }
-  }
-*/
 //**********************************************************************
 void seleccionInicial() {
   char teclaOprimida = teclado.getKey();
@@ -931,6 +663,8 @@ void seleccionInicial() {
           num_respuesta2 = 4;
           //enviarDatos();
         }
+
+
 
       }
     }
@@ -1306,21 +1040,23 @@ void leerTeclado() {
 
       }
     }
-    else if (tecla == '#') {
+
+    /*
+      else if (tecla == '#') {
       //aquí guardo el string en un rótulo,
       idMateriales = datoTeclado;
       cuentaLecturas = 1;
       contadorTeclado = 0;
       idProduccionString = "";
-      
+
 
 
       lcd.setCursor(4, 0);
       lcd.print(datoTeclado + "->OK");
       Serial.print("valor del id después de digitar uno = ");
       Serial.println(datoTeclado);
-    }
-
+      }
+    */
     else {
       idProduccion[contadorTeclado] = tecla;
       lcd.setCursor(4, 0);
@@ -1339,11 +1075,18 @@ void leerTeclado() {
       Serial.println (idProduccionString);
       contadorTeclado++;
 
+//reviso si se presiona el botón de enviar
+
+
+  
+      
+
     }
 
   }
   //datoTag =idProduccionString;
   datoTeclado = idProduccionString;
+
 
   leerMasa();
 
@@ -1385,11 +1128,50 @@ void leerMasa() {
         return;
       }
     }
+  }
+
+if (digitalRead(WIFI_PIN) == HIGH) {
+    //hum = 2;
+    idMateriales = datoTeclado;
+    cuentaLecturas = 1;
+    contadorTeclado = 0;
+    idProduccionString = "";
+
+    lcd.setCursor(4, 0);
+    lcd.print(datoTeclado + "->OK");
+    Serial.print("valor del id después de digitar uno = ");
+    Serial.println(datoTeclado);
+
+    salida++;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Enviando:");
+    //lcd.setCursor(0, 1);
+    //lcd.print("-->Acabado");
+    //cuentaEnvio++;
+    digitalWrite(ledPin, HIGH);
+    delay(700);
+    digitalWrite(ledPin, LOW);
+    Serial.print("rótulos enviados");
+    Serial.println(rotulo);
+    proceso = 13;
+    distancia = idMateriales;
+
+    enviarIdMateriales();
+    rotulo = "";
 
     //lcd.clear();
     //return;
 
   }
+
+
 }
 
 //******************************************************************
+void enviarIdMateriales() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("enviaRetiro");
+}
+//*****************************************************************
