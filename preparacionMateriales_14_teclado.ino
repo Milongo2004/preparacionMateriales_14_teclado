@@ -605,9 +605,9 @@ void menuInicio () {
   salida = 0;
   contadorSalida = 0;
   lcd.setCursor(0, 0);
-  lcd.print("A.Ingres B.Retir");
+  lcd.print("A.Ingres B.Salid");
   lcd.setCursor(0, 1);
-  lcd.print("   C.Desperd");
+  lcd.print("C.Retorn D.Despe");
 }
 
 //**********************************************************************
@@ -658,7 +658,7 @@ void seleccionInicial() {
 
           Serial.println(" Retirar material de la nevera ");
 
-          lcd.print("RetirarMaterial");
+          lcd.print("SalidaMaterial");
           claseTag = 1;
           temp = String(masa).toInt();
           proceso = 16;
@@ -681,13 +681,84 @@ void seleccionInicial() {
       }
     }
 
+
     else if (teclaOprimida == 'C') {
+
+
+
+      int contador = 0;
+      while (contador <= 1 ) {
+
+
+        if (contador == 0) {
+
+          Serial.println(" Retornar material a la nevera ");
+
+          lcd.print("RetornaMaterial");
+          claseTag = 1;
+          temp = String(masa).toInt();
+          proceso = 16;
+          hum = 8;
+          //temp = -temp; comento porque el material se suma al inventario inicial
+          num_respuesta = 0; //para obtener ingreso exitoso
+          num_respuesta2 = 4;
+          leerTeclado();
+          if (salida == 1) {
+            return;
+          }
+
+
+         
+          //enviarDatos();
+        }
+
+
+
+      }
+    }
+
+    else if (teclaOprimida == 'D') {
+
+
+
+      int contador = 0;
+      while (contador <= 1 ) {
+
+
+        if (contador == 0) {
+
+          Serial.println(" Descarta material de la nevera ");
+
+          lcd.print("DescartaMaterial");
+          claseTag = 1;
+          temp = String(masa).toInt();
+          proceso = 16;
+          hum = 9;
+          temp = -temp;
+          num_respuesta = 0; //para obtener ingreso exitoso
+          num_respuesta2 = 4;
+          leerTeclado();
+          if (salida == 1) {
+            return;
+          }
+
+
+         
+          //enviarDatos();
+        }
+
+
+
+      }
+    }
+
+    else if (teclaOprimida == '#') {
       Serial.println(" Lectura ");
 
 
 
 
-      lcd.print("RetornarMaterial");
+      lcd.print("grabar colores");
 
 
 
