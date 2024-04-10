@@ -480,6 +480,17 @@ void enviarDatos() {
     client.println("Connection: close");
     client.println();
     Serial.println("Envio con exito (al archivo controller/index y models/herramienta)");
+    Serial.print("proceso=");
+     Serial.println(proceso);
+    Serial.print("idInicial=");
+     Serial.println(distancia);
+    Serial.print("estacion=");
+     Serial.println(hum);
+    Serial.print("masa=");
+     Serial.println(temp);
+    
+    
+    
     lcd.setCursor(0, 0);
     lcd.print("Envio Exitoso");
 
@@ -649,18 +660,19 @@ void seleccionInicial() {
 
           lcd.print("RetirarMaterial");
           claseTag = 1;
+          temp = String(masa).toInt();
+          proceso = 16;
+          hum = 1;
+          temp = -temp;
+          num_respuesta = 0; //para obtener ingreso exitoso
+          num_respuesta2 = 4;
           leerTeclado();
           if (salida == 1) {
             return;
           }
 
 
-          temp = String(masa).toInt();
-          proceso = 11;
-          hum = 1;
-          temp = -temp;
-          num_respuesta = 0; //para obtener ingreso exitoso
-          num_respuesta2 = 4;
+         
           //enviarDatos();
         }
 
@@ -1142,6 +1154,8 @@ if (digitalRead(WIFI_PIN) == HIGH) {
     Serial.print("valor del id después de digitar uno = ");
     Serial.println(datoTeclado);
 
+    delay(500);
+
     salida++;
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -1154,10 +1168,10 @@ if (digitalRead(WIFI_PIN) == HIGH) {
     digitalWrite(ledPin, LOW);
     Serial.print("rótulos enviados");
     Serial.println(rotulo);
-    proceso = 13;
+    proceso = 16;
     distancia = idMateriales;
 
-    enviarIdMateriales();
+    enviarDatos();
     rotulo = "";
 
     //lcd.clear();
@@ -1167,11 +1181,3 @@ if (digitalRead(WIFI_PIN) == HIGH) {
 
 
 }
-
-//******************************************************************
-void enviarIdMateriales() {
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("enviaRetiro");
-}
-//*****************************************************************
